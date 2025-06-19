@@ -9,6 +9,10 @@ class BaseProductSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
+            "price",
+            "quantity",
+            "image",
+            "description",
         ]
 
 
@@ -25,4 +29,8 @@ class CreateProductSerializer(BaseProductSerializer):
         fields = [
             "id",
             "name",
+            "price",
+            "quantity",
+            "image",
+            "description",
         ]

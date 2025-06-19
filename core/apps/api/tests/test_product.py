@@ -6,7 +6,6 @@ from core.apps.api.models import OrderitemsModel, OrderModel, ProductModel
 
 
 class ProductTest(TestCase):
-
     def _create_data(self):
         return ProductModel._create_fake()
 
@@ -48,7 +47,6 @@ class ProductTest(TestCase):
 
 
 class OrderTest(TestCase):
-
     def _create_data(self):
         return OrderModel._create_fake()
 

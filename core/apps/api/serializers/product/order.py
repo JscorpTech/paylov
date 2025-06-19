@@ -1,14 +1,16 @@
 from rest_framework import serializers
 
 from core.apps.api.models import OrderModel
+from core.apps.accounts.serializers.user import UserSerializer
 
 
 class BaseOrderSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
     class Meta:
         model = OrderModel
         fields = [
             "id",
-            "name",
+            "user",
         ]
 
 
@@ -24,5 +26,5 @@ class CreateOrderSerializer(BaseOrderSerializer):
     class Meta(BaseOrderSerializer.Meta):
         fields = [
             "id",
-            "name",
+            "user",
         ]

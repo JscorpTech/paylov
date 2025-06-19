@@ -4,7 +4,7 @@ from core.apps.api import views
 
 router = DefaultRouter()
 router.register("product", views.ProductView, basename="product")
-router.register("order", views.OrderitemsView, basename="order")
+router.register("order", views.OrderView, basename="order")
 
 urlpatterns = [
     path("", include(router.urls)),
