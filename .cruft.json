@@ -1,0 +1,28 @@
+{
+ "template": "https://github.com/JscorpTech/django",
+ "commit": "a0d047554c85ccc3361e5a31c634f7166e1364d8",
+ "checkout": null,
+ "context": {
+  "cookiecutter": {
+   "cacheops": true,
+   "silk": true,
+   "storage": true,
+   "rosetta": false,
+   "channels": false,
+   "ckeditor": true,
+   "modeltranslation": true,
+   "parler": false,
+   "project_name": "paylov",
+   "settings_module": "config.settings.local",
+   "runner": "wsgi",
+   "script": "entrypoint.sh",
+   "key": "key",
+   "port": "8081",
+   "phone": "998888112309",
+   "password": "2309",
+   "max_line_length": "120",
+   "project_slug": "paylov"
+  }
+ },
+ "directory": null
+}
