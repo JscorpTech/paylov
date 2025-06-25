@@ -20,3 +20,10 @@ class OrderitemsValidator:
 
     def __call__(self):
         return True
+
+
+class CartValidator:
+    def __init__(self): ...
+
+    def __call__(self):
+        return True

@@ -1,7 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_core.models import AbstractBaseModel
-from django.contrib.auth import get_user_model
+from core.apps.api.enums import PaymentStatusEnum, OrderStatusEnum
 
 
 class ProductModel(AbstractBaseModel):
@@ -31,6 +32,12 @@ class ProductModel(AbstractBaseModel):
 
 class OrderModel(AbstractBaseModel):
     user = models.ForeignKey(get_user_model(), verbose_name="user", related_name="orders", on_delete=models.CASCADE)
+    payment_status = models.CharField(
+        _("payment status"), choices=PaymentStatusEnum.choices, default=PaymentStatusEnum.PENDING
+    )
+    status = models.CharField(
+        _("status"), choices=OrderStatusEnum.choices, default=OrderStatusEnum.CREATED, max_length=20
+    )
 
     def __str__(self):
         return str(self.pk)
@@ -50,8 +57,9 @@ class OrderModel(AbstractBaseModel):
 class OrderitemsModel(AbstractBaseModel):
     order = models.ForeignKey(OrderModel, verbose_name="order", related_name="items", on_delete=models.CASCADE)
     product = models.ForeignKey(ProductModel, verbose_name="product", related_name="items", on_delete=models.CASCADE)
-    quantity = models.IntegerField(verbose_name=_("quantity"))
+    count = models.IntegerField(verbose_name=_("count"), default=1)
     price = models.FloatField(verbose_name=_("price"))
+    discount = models.FloatField(_("discount"), null=True, blank=True)
 
     def __str__(self):
         return str(self.pk)
@@ -69,3 +77,23 @@ class OrderitemsModel(AbstractBaseModel):
         db_table = "orderitems"
         verbose_name = _("OrderitemsModel")
         verbose_name_plural = _("OrderitemsModels")
+
+
+class CartModel(AbstractBaseModel):
+    product = models.ForeignKey("ProductModel", verbose_name=_("product"), on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), verbose_name=_("user"), on_delete=models.CASCADE, related_name="carts")
+    count = models.PositiveIntegerField(_("count"), default=1)
+
+    def __str__(self):
+        return str(self.pk)
+
+    @classmethod
+    def _create_fake(self):
+        return self.objects.create(
+            name="mock",
+        )
+
+    class Meta:
+        db_table = "cart"
+        verbose_name = _("CartModel")
+        verbose_name_plural = _("CartModels")

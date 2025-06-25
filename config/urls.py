@@ -7,8 +7,7 @@ from config.env import env
 from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.static import serve
-from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
-                                   SpectacularSwaggerView)
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 ################
 # My apps url
@@ -17,6 +16,7 @@ urlpatterns = [
     path("", include("core.apps.accounts.urls")),
     path("", include("core.apps.api.urls")),
     path("", include("core.apps.shared.urls")),
+    path("api/", include("core.apps.payment.urls")),
 ]
 
 
@@ -27,7 +27,6 @@ urlpatterns += [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
-    
     path("ckeditor5/", include("django_ckeditor_5.urls"), name="ck_editor_5_upload_file"),
 ]
 
@@ -35,9 +34,7 @@ urlpatterns += [
 # Project env debug mode
 ################
 if env.str("PROJECT_ENV") == "debug":
-    urlpatterns += [
-        path('silk/', include('silk.urls', namespace='silk'))
-    ]
+    urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
 
     ################
     # Swagger urls

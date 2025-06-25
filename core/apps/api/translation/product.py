@@ -1,6 +1,6 @@
 from modeltranslation.translator import TranslationOptions, register
 
-from core.apps.api.models import OrderitemsModel, OrderModel, ProductModel
+from core.apps.api.models import CartModel, OrderitemsModel, OrderModel, ProductModel
 
 
 @register(ProductModel)
@@ -15,4 +15,9 @@ class OrderTranslation(TranslationOptions):
 
 @register(OrderitemsModel)
 class OrderitemsTranslation(TranslationOptions):
+    fields = []
+
+
+@register(CartModel)
+class CartTranslation(TranslationOptions):
     fields = []

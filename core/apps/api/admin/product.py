@@ -1,7 +1,7 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
 
-from core.apps.api.models import OrderitemsModel, OrderModel, ProductModel
+from core.apps.api.models import CartModel, OrderitemsModel, OrderModel, ProductModel
 
 
 @admin.register(ProductModel)
@@ -22,6 +22,14 @@ class OrderAdmin(ModelAdmin):
 
 @admin.register(OrderitemsModel)
 class OrderitemsAdmin(ModelAdmin):
+    list_display = (
+        "id",
+        "__str__",
+    )
+
+
+@admin.register(CartModel)
+class CartAdmin(ModelAdmin):
     list_display = (
         "id",
         "__str__",

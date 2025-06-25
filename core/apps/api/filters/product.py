@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from core.apps.api.models import OrderitemsModel, OrderModel, ProductModel
+from core.apps.api.models import CartModel, OrderitemsModel, OrderModel, ProductModel
 
 
 class ProductFilter(filters.FilterSet):
@@ -28,6 +28,16 @@ class OrderitemsFilter(filters.FilterSet):
 
     class Meta:
         model = OrderitemsModel
+        fields = [
+            "name",
+        ]
+
+
+class CartFilter(filters.FilterSet):
+    # name = filters.CharFilter(field_name="name", lookup_expr="icontains")
+
+    class Meta:
+        model = CartModel
         fields = [
             "name",
         ]
