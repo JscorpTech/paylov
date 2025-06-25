@@ -39,6 +39,10 @@ class OrderModel(AbstractBaseModel):
         _("status"), choices=OrderStatusEnum.choices, default=OrderStatusEnum.CREATED, max_length=20
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._payment_status = self.payment_status
+
     def __str__(self):
         return str(self.pk)
 
