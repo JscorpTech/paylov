@@ -9,3 +9,4 @@ from .spectacular import * # noqa
 
 from .ckeditor import *  # noqa
 from .storage import *  # noqa
+from .logs import * # noqa

@@ -10,6 +10,7 @@ from django.db.transaction import atomic
 from core.apps.api.serializers.product.order import RetrieveOrderSerializer
 from core.apps.payment.services import generate_payment_link
 from core.apps.api.services import get_order_total_price
+from django.db.models import F
 
 from core.apps.api.models import CartModel, OrderitemsModel, OrderModel, ProductModel
 from core.apps.api.serializers.product import (
@@ -44,7 +45,7 @@ class ProductView(BaseViewSetMixin, ReadOnlyModelViewSet):
 
 @extend_schema(tags=["order"])
 class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
-    queryset = OrderModel.objects.all()
+    queryset = OrderModel.objects.order_by("-id").all()
     serializer_class = ListOrderSerializer
     permission_classes = [IsAuthenticated]
 
@@ -111,7 +112,12 @@ class CartView(BaseViewSetMixin, ModelViewSet):
     }
 
     def get_queryset(self):
-        return CartModel.objects.filter(user=self.request.user)
+        return CartModel.objects.order_by("-id").filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        product = serializer.validated_data.get("product")
+        cart = CartModel.objects.filter(user=self.request.user, product_id=product)
+        if cart.exists():
+            cart.update(count=F("count") + 1)
+            return
         serializer.save(user=self.request.user)

@@ -1,14 +1,91 @@
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from core.apps.api.models import OrderModel
+from core.apps.payment.serializers import PaylovCallbackSerializers
+from core.apps.api.services.product import get_order_total_price
+import logging
+from core.apps.payment.exceptions import InvalidAmountException, OrderNotFoundException
+from core.apps.api.enums.product import PaymentStatusEnum
+from rest_framework import status
+
+logger = logging.getLogger("uvicorn")
+logger.setLevel(logging.DEBUG)
 
 
-class PaymentViewset(ViewSet):
+class PaymentViewset(GenericViewSet):
     permission_classes = [AllowAny]
-    
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.action == "paylov":
+            return PaylovCallbackSerializers
+        raise NotImplementedError(f"No serializer class defined for action: {self.action}")
+
     @action(methods=["POST"], detail=False, url_name="paylov", url_path="paylov")
     def paylov(self, request):
-        data = request.data
-        print(data)
-        return Response(data={"jsonrpc": "2.0", "id": data.get("id"), "result": {"status": "0", "statusText": "OK"}})
+        try:
+            serializer_class = self.get_serializer_class()
+            ser = serializer_class(data=request.data)
+            ser.is_valid(raise_exception=True)
+
+            params = ser.validated_data.get("params")
+            order_id = params.get("account", {}).get("order_id")
+            amount = params.get("amount")
+
+            order_qs = OrderModel.objects.filter(id=order_id)
+            if not order_qs.exists():
+                raise OrderNotFoundException("Order not found")
+
+            order = order_qs.first()
+            self.paylov_validate(order, amount)
+
+            method = ser.validated_data.get("method")
+            logger.info(f"Paylov method: {method}")
+
+            match method:
+                case "transaction.check":
+                    return self.paylov_check(request.data.get("id"))
+                case "transaction.perform":
+                    return self.paylov_perform(order, request.data.get("id"))
+                case _:
+                    return Response(
+                        {
+                            "jsonrpc": "2.0",
+                            "id": request.data.get("id"),
+                            "error": {"code": -32601, "message": "Method not found"},
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+        except (InvalidAmountException, OrderNotFoundException) as e:
+            logger.error(str(e))
+            return Response(
+                {
+                    "jsonrpc": "2.0",
+                    "id": request.data.get("id"),
+                    "result": {"status": "3", "statusText": str(e)},
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def paylov_perform(self, order, id):
+        order.payment_status = PaymentStatusEnum.PAID.value
+        order.save()
+        return Response(
+            {"jsonrpc": "2.0", "id": id, "result": {"status": "0", "statusText": "OK"}}
+        )
+
+    def paylov_validate(self, order, amount):
+        expected_amount = int(get_order_total_price(order))
+        if expected_amount != int(amount):
+            raise InvalidAmountException("Invalid amount")
+
+    def paylov_check(self, id):
+        return Response(
+            {
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": {"status": "0", "statusText": "OK"},
+            }
+        )
