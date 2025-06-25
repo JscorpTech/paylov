@@ -9,6 +9,8 @@ import logging
 from core.apps.payment.exceptions import InvalidAmountException, OrderNotFoundException
 from core.apps.api.enums.product import PaymentStatusEnum
 from rest_framework import status
+from core.apps.payment.models import TransactionModel
+from core.apps.payment.enums import TransactionStatusEnum, PaymentProviderEnum
 
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.DEBUG)
@@ -47,7 +49,7 @@ class PaymentViewset(GenericViewSet):
                 case "transaction.check":
                     return self.paylov_check(request.data.get("id"))
                 case "transaction.perform":
-                    return self.paylov_perform(order, request.data.get("id"))
+                    return self.paylov_perform(order, amount, request.data.get("id"))
                 case _:
                     return Response(
                         {
@@ -69,12 +71,17 @@ class PaymentViewset(GenericViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def paylov_perform(self, order, id):
+    def paylov_perform(self, order, amount, id):
         order.payment_status = PaymentStatusEnum.PAID.value
         order.save()
-        return Response(
-            {"jsonrpc": "2.0", "id": id, "result": {"status": "0", "statusText": "OK"}}
+        TransactionModel.objects.create(
+            amount=amount,
+            currency=860,
+            order=order,
+            status=TransactionStatusEnum.SUCCESS.value,
+            provider=PaymentProviderEnum.PAYLOV.value,
         )
+        return Response({"jsonrpc": "2.0", "id": id, "result": {"status": "0", "statusText": "OK"}})
 
     def paylov_validate(self, order, amount):
         expected_amount = int(get_order_total_price(order))
