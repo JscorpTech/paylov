@@ -56,6 +56,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
         "create": CreateOrderSerializer,
     }
 
+    @extend_schema(summary="Korzonkadagi tovarlarni buyurtma berish")
     @action(methods=["POST"], detail=False, url_name="checkout", url_path="checkout")
     def checkout(self, request):
         carts = self.request.user.carts
@@ -76,6 +77,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
             }
         )
 
+    @extend_schema(summary="Buyurtma uchun to'lov linkini yaratish")
     @action(methods=["GET"], detail=True, url_name="create-transaction", url_path="create-transaction")
     def create_transaction(self, request, pk):
         order = self.get_object()
@@ -97,7 +99,7 @@ class OrderitemsView(BaseViewSetMixin, ReadOnlyModelViewSet):
     }
 
 
-@extend_schema(tags=["cart"])
+@extend_schema(tags=["basket"], summary="Konzinka")
 class CartView(BaseViewSetMixin, ModelViewSet):
     serializer_class = ListCartSerializer
     permission_classes = [IsAuthenticated]

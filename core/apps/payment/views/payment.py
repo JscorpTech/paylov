@@ -11,11 +11,13 @@ from core.apps.api.enums.product import PaymentStatusEnum
 from rest_framework import status
 from core.apps.payment.models import TransactionModel
 from core.apps.payment.enums import TransactionStatusEnum, PaymentProviderEnum
+from drf_spectacular.utils import extend_schema
 
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.DEBUG)
 
 
+@extend_schema(deprecated=True, tags=["payment"])
 class PaymentViewset(GenericViewSet):
     permission_classes = [AllowAny]
 
