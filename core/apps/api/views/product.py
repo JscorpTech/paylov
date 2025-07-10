@@ -62,7 +62,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
         return queryset
 
     @extend_schema(summary="Yangi to'lov qilingan orderlar uchun")
-    @action(methods=["POST"], detail=False, url_name="notify", url_path="notify")
+    @action(methods=["GET"], detail=False, url_name="notify", url_path="notify")
     def notify(self, request):
         queryset = self.get_queryset()
         if not queryset.exists():
@@ -70,7 +70,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
         return Response(data={"notify": True})
 
     @extend_schema(summary="Notification o'qildi deb belgilash")
-    @action(methods=["POST"], detail=False, url_name="notify-read", url_path="notify-read")
+    @action(methods=["GET"], detail=False, url_name="notify-read", url_path="notify-read")
     def notify_read(self, request):
         self.get_queryset().update(is_notify=True)
         return Response(data={"detail": "ok"})
