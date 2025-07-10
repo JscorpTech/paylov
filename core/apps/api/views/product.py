@@ -1,5 +1,5 @@
 from django_core.mixins import BaseViewSetMixin
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.decorators import action
@@ -61,7 +61,14 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
             queryset = queryset.filter(is_notify=False)
         return queryset
 
-    @extend_schema(summary="Yangi to'lov qilingan orderlar uchun")
+    @extend_schema(
+        summary="Yangi to'lov qilingan orderlar uchun",
+        responses={
+            200: OpenApiResponse(
+                response={"type": "object", "properties": {"notify": {"type": "boolean", "example": False}}}
+            )
+        },
+    )
     @action(methods=["GET"], detail=False, url_name="notify", url_path="notify")
     def notify(self, request):
         queryset = self.get_queryset()
@@ -69,7 +76,19 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
             return Response(data={"notify": False})
         return Response(data={"notify": True})
 
-    @extend_schema(summary="Notification o'qildi deb belgilash")
+    @extend_schema(
+        summary="Notification o'qildi deb belgilash",
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "detail": {"type": "string", "example": "ok"},
+                    },
+                }
+            )
+        },
+    )
     @action(methods=["GET"], detail=False, url_name="notify-read", url_path="notify-read")
     def notify_read(self, request):
         self.get_queryset().update(is_notify=True)
