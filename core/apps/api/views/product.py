@@ -56,6 +56,26 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
         "create": CreateOrderSerializer,
     }
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == "notify" or self.action == "notify_read":
+            queryset = queryset.filter(is_notify=False)
+        return queryset
+
+    @extend_schema(summary="Yangi to'lov qilingan orderlar uchun")
+    @action(methods=["POST"], detail=False, url_name="notify", url_path="notify")
+    def notify(self, request):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            return Response(data={"notify": False})
+        return Response(data={"notify": True})
+
+    @extend_schema(summary="Notification o'qildi deb belgilash")
+    @action(methods=["POST"], detail=False, url_name="notify-read", url_path="notify-read")
+    def notify_read(self, request):
+        self.get_queryset().update(is_notify=True)
+        return Response(data={"detail": "ok"})
+
     @extend_schema(summary="Korzonkadagi tovarlarni buyurtma berish")
     @action(methods=["POST"], detail=False, url_name="checkout", url_path="checkout")
     def checkout(self, request):

@@ -32,6 +32,7 @@ class ProductModel(AbstractBaseModel):
 
 class OrderModel(AbstractBaseModel):
     user = models.ForeignKey(get_user_model(), verbose_name="user", related_name="orders", on_delete=models.CASCADE)
+    is_notify = models.BooleanField(_("Is Notify"), default=False)
     payment_status = models.CharField(
         _("payment status"), choices=PaymentStatusEnum.choices, default=PaymentStatusEnum.PENDING
     )
