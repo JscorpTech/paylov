@@ -45,7 +45,6 @@ class ProductView(BaseViewSetMixin, ReadOnlyModelViewSet):
 
 @extend_schema(tags=["order"])
 class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
-    queryset = OrderModel.objects.order_by("-id").all()
     serializer_class = ListOrderSerializer
     permission_classes = [IsAuthenticated]
 
@@ -57,7 +56,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     }
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = OrderModel.objects.order_by("-id").filter(user=self.request.user)
         if self.action == "notify" or self.action == "notify_read":
             queryset = queryset.filter(is_notify=False)
         return queryset
