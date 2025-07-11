@@ -31,7 +31,9 @@ class ProductModel(AbstractBaseModel):
 
 
 class OrderModel(AbstractBaseModel):
-    user = models.ForeignKey(get_user_model(), verbose_name="user", related_name="orders", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        get_user_model(), verbose_name="user", related_name="orders", on_delete=models.CASCADE, null=True, blank=True
+    )
     is_notify = models.BooleanField(_("Is Notify"), default=False)
     payment_status = models.CharField(
         _("payment status"), choices=PaymentStatusEnum.choices, default=PaymentStatusEnum.PENDING
@@ -39,6 +41,12 @@ class OrderModel(AbstractBaseModel):
     status = models.CharField(
         _("status"), choices=OrderStatusEnum.choices, default=OrderStatusEnum.CREATED, max_length=20
     )
+
+    # Order reciver info
+    first_name = models.CharField(_("First Name"), null=True, blank=True)
+    last_name = models.CharField(_("Last Name"), null=True, blank=True)
+    phone = models.CharField(_("phone"), null=True, blank=True)
+    address = models.CharField(_("Address"), blank=True, null=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

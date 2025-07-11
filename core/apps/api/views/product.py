@@ -46,9 +46,12 @@ class ProductView(BaseViewSetMixin, ReadOnlyModelViewSet):
 @extend_schema(tags=["order"])
 class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     serializer_class = ListOrderSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
-    action_permission_classes = {}
+    action_permission_classes = {
+        "create": [AllowAny],
+        "retrieve": [AllowAny],
+    }
     action_serializer_class = {
         "list": ListOrderSerializer,
         "retrieve": RetrieveOrderSerializer,
@@ -56,10 +59,18 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     }
 
     def get_queryset(self):
-        queryset = OrderModel.objects.order_by("-id").filter(user=self.request.user)
+        queryset = OrderModel.objects.order_by("-id")
+        if self.action not in ["retrieve", "notify_read"]:
+            queryset = queryset.filter(user=self.request.user)
         if self.action == "notify" or self.action == "notify_read":
             queryset = queryset.filter(is_notify=False)
         return queryset
+
+    def create(self, request):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        return Response(data=ser.data)
 
     @extend_schema(
         summary="Yangi to'lov qilingan orderlar uchun",
@@ -71,7 +82,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     )
     @action(methods=["GET"], detail=False, url_name="notify", url_path="notify")
     def notify(self, request):
-        queryset = self.get_queryset()
+        queryset = self.get_object()
         if not queryset.exists():
             return Response(data={"notify": False})
         return Response(data={"notify": True})
@@ -89,9 +100,11 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
             )
         },
     )
-    @action(methods=["GET"], detail=False, url_name="notify-read", url_path="notify-read")
-    def notify_read(self, request):
-        self.get_queryset().update(is_notify=True)
+    @action(methods=["GET"], detail=True, url_name="notify-read", url_path="notify-read")
+    def notify_read(self, request, pk):
+        instance = self.get_object()
+        instance.is_notify = True
+        instance.save()
         return Response(data={"detail": "ok"})
 
     @extend_schema(summary="Korzonkadagi tovarlarni buyurtma berish")
