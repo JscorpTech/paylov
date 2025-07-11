@@ -5,7 +5,10 @@ from core.apps.api.models import CartModel, OrderitemsModel, OrderModel, Product
 
 @register(ProductModel)
 class ProductTranslation(TranslationOptions):
-    fields = []
+    fields = [
+        "name",
+        "description"
+    ]
 
 
 @register(OrderModel)

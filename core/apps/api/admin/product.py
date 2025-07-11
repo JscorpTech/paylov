@@ -4,6 +4,7 @@ from unfold.admin import ModelAdmin, TabularInline
 from core.apps.api.models import CartModel, OrderitemsModel, OrderModel, ProductModel
 from unfold.decorators import display
 from core.apps.api.enums import OrderStatusEnum, PaymentStatusEnum
+from modeltranslation.admin import TabbedTranslationAdmin
 
 
 class OrderItemInline(TabularInline):
@@ -12,7 +13,7 @@ class OrderItemInline(TabularInline):
     extra = 0
 
 @admin.register(ProductModel)
-class ProductAdmin(ModelAdmin):
+class ProductAdmin(TabbedTranslationAdmin, ModelAdmin):
     list_display = ("id", "name", "price", "quantity")
 
 

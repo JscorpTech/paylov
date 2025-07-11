@@ -47,6 +47,11 @@ PAGES = [
                 "icon": "garden_cart",
                 "link": reverse_lazy("admin:api_cartmodel_changelist"),
             },
+            {
+                "title": _("Settings"),
+                "icon": "settings",
+                "link": reverse_lazy("admin:shared_settingsmodel_changelist"),
+            },
         ],
     },
     {
@@ -58,7 +63,6 @@ PAGES = [
                 "icon": "account_balance_wallet",
                 "link": reverse_lazy("admin:payment_transactionmodel_changelist"),
             },
-            
         ],
     },
 ]
