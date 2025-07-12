@@ -96,13 +96,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 # fmt: on
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.{}".format(validator)
-    } for validator in [
+    {"NAME": "django.contrib.auth.password_validation.{}".format(validator)}
+    for validator in [
         "UserAttributeSimilarityValidator",
         "MinimumLengthValidator",
         "CommonPasswordValidator",
-        "NumericPasswordValidator"
+        "NumericPasswordValidator",
     ]
 ]
 
@@ -119,7 +118,10 @@ TIME_FORMAT = "H:i:s"
 DATE_INPUT_FORMATS = ["%d.%m.%Y", "%Y.%d.%m", "%Y.%d.%m"]
 
 
-SEEDERS = ["core.apps.accounts.seeder.UserSeeder"]
+SEEDERS = [
+    # "core.apps.accounts.seeder.UserSeeder",
+    "core.apps.shared.seeder.SettingsSeeder",
+]
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "resources/static"),
@@ -156,7 +158,6 @@ MODELTRANSLATION_LANGUAGES = ("uz", "ru", "en")
 MODELTRANSLATION_DEFAULT_LANGUAGE = "uz"
 
 
-
 JST_LANGUAGES = [
     {
         "code": "uz",
@@ -170,5 +171,5 @@ JST_LANGUAGES = [
     {
         "code": "ru",
         "name": "Russia",
-    }
+    },
 ]

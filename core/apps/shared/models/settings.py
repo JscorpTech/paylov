@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class SettingsModel(AbstractBaseModel):
-    key = models.CharField(_("key"))
+    key = models.CharField(_("key"), unique=True, db_index=True)
     is_public = models.BooleanField(_("is public"), default=False)
     description = models.TextField(_("description"), blank=True, null=True)
 
@@ -19,7 +19,7 @@ class OptionsModel(models.Model):
     settings = models.ForeignKey(
         "SettingsModel", verbose_name=_("settings"), on_delete=models.CASCADE, related_name="options"
     )
-    key = models.CharField(_("key"), max_length=255)
+    key = models.CharField(_("key"), max_length=255, unique=True, db_index=True)
     value = ArrayField(
         models.CharField(_("value"), max_length=255),
         verbose_name=_("value"),
