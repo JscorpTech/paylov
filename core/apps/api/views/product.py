@@ -60,7 +60,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = OrderModel.objects.order_by("-id")
-        if self.action not in ["retrieve", "notify_read"]:
+        if self.action not in ["retrieve", "notify_read", "create_transaction"]:
             queryset = queryset.filter(user=self.request.user)
         if self.action == "notify" or self.action == "notify_read":
             queryset = queryset.filter(is_notify=False)
@@ -129,10 +129,12 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
         )
 
     @extend_schema(summary="Buyurtma uchun to'lov linkini yaratish")
-    @action(methods=["GET"], detail=True, url_name="create-transaction", url_path="create-transaction")
-    def create_transaction(self, request, pk):
+    @action(
+        methods=["GET"], detail=True, url_name="create-transaction", url_path="create-transaction/(?P<currency>uzs|usd)"
+    )
+    def create_transaction(self, request, pk, currency):
         order = self.get_object()
-        link = generate_payment_link(int(get_order_total_price(order)), order.id)
+        link = generate_payment_link(int(get_order_total_price(order)), order.id, currency)
         return Response(data={"payment_link": link})
 
 

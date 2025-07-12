@@ -12,6 +12,7 @@ from rest_framework import status
 from core.apps.payment.models import TransactionModel
 from core.apps.payment.enums import TransactionStatusEnum, PaymentProviderEnum
 from drf_spectacular.utils import extend_schema
+from core.apps.payment.services import uzs_to_usd
 
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.DEBUG)
@@ -36,13 +37,14 @@ class PaymentViewset(GenericViewSet):
             params = ser.validated_data.get("params")
             order_id = params.get("account", {}).get("order_id")
             amount = params.get("amount")
+            currency = params.get("currency", "uzs")
 
             order_qs = OrderModel.objects.filter(id=order_id)
             if not order_qs.exists():
                 raise OrderNotFoundException("Order not found")
 
             order = order_qs.first()
-            self.paylov_validate(order, amount)
+            self.paylov_validate(order, amount, currency)
 
             method = ser.validated_data.get("method")
             logger.info(f"Paylov method: {method}")
@@ -51,7 +53,7 @@ class PaymentViewset(GenericViewSet):
                 case "transaction.check":
                     return self.paylov_check(request.data.get("id"))
                 case "transaction.perform":
-                    return self.paylov_perform(order, amount, request.data.get("id"))
+                    return self.paylov_perform(order, amount, request.data.get("id"), currency)
                 case _:
                     return Response(
                         {
@@ -73,21 +75,23 @@ class PaymentViewset(GenericViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def paylov_perform(self, order, amount, id):
+    def paylov_perform(self, order, amount, id, currency):
         order.payment_status = PaymentStatusEnum.PAID.value
         order.save()
         TransactionModel.objects.create(
             amount=amount,
-            currency=860,
+            currency=currency,
             order=order,
             status=TransactionStatusEnum.SUCCESS.value,
             provider=PaymentProviderEnum.PAYLOV.value,
         )
         return Response({"jsonrpc": "2.0", "id": id, "result": {"status": "0", "statusText": "OK"}})
 
-    def paylov_validate(self, order, amount):
-        expected_amount = int(get_order_total_price(order))
-        if expected_amount != int(amount):
+    def paylov_validate(self, order, amount, currency):
+        expected_amount = float(get_order_total_price(order))
+        if currency == 840:
+            expected_amount = uzs_to_usd(expected_amount)
+        if float(expected_amount) != float(amount):
             raise InvalidAmountException("Invalid amount")
 
     def paylov_check(self, id):
