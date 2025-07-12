@@ -46,7 +46,11 @@ class OrderModel(AbstractBaseModel):
     first_name = models.CharField(_("First Name"), null=True, blank=True)
     last_name = models.CharField(_("Last Name"), null=True, blank=True)
     phone = models.CharField(_("phone"), null=True, blank=True)
-    address = models.CharField(_("Address"), blank=True, null=True)
+    company_name = models.CharField(_("Company Name"), null=True, blank=True)
+    city = models.CharField(_("City"), null=True, blank=True)
+    region = models.CharField(_("Region"), null=True, blank=True)
+    district = models.CharField(_("District"), null=True, blank=True)
+    comment = models.CharField(_("Comment"), null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

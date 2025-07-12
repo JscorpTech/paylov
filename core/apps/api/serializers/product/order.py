@@ -40,8 +40,14 @@ class CreateOrderSerializer(BaseOrderSerializer):
                 errors["last_name"] = _("Last Name is required")
             if attrs.get("phone") is None:
                 errors["phone"] = _("Phone is required")
-            if attrs.get("address") is None:
-                errors["address"] = _("Address is required")
+            if attrs.get("region") is None:
+                errors["region"] = _("Region is required")
+            if attrs.get("district") is None:
+                errors["district"] = _("District is required")
+            if attrs.get("company_name") is None:
+                errors["company_name"] = _("Company Name is required")
+            if attrs.get("city") is None:
+                errors["city"] = _("City is required")
             if len(errors) > 0:
                 raise ValidationError(errors)
         return attrs
@@ -62,5 +68,9 @@ class CreateOrderSerializer(BaseOrderSerializer):
             "first_name",
             "last_name",
             "phone",
-            "address",
+            "city",
+            "region",
+            "district",
+            "company_name",
+            "comment",
         ]
