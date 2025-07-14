@@ -38,6 +38,7 @@ class PaymentViewset(GenericViewSet):
             order_id = params.get("account", {}).get("order_id")
             amount = params.get("amount")
             currency = int(params.get("currency", 860))
+            logging.info(params)
 
             order_qs = OrderModel.objects.filter(id=order_id)
             if not order_qs.exists():
@@ -93,7 +94,7 @@ class PaymentViewset(GenericViewSet):
             expected_amount = uzs_to_usd(expected_amount)
         if float(expected_amount) != tiny_to_amount(int(amount)):
             raise InvalidAmountException(
-                "Invalid amount {} {} {}".format(float(expected_amount), tiny_to_amount(int(amount)), currency)
+                "Invalid amount {} {} {} {}".format(float(expected_amount), tiny_to_amount(int(amount)), currency, amount)
             )
 
     def paylov_check(self, id):
