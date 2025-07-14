@@ -91,7 +91,7 @@ class PaymentViewset(GenericViewSet):
         expected_amount = get_order_total_price(order)
         if currency == 840:
             expected_amount = uzs_to_usd(expected_amount)
-        if float(expected_amount) != tiny_to_amount(amount):
+        if float(expected_amount) != tiny_to_amount(int(amount)):
             raise InvalidAmountException("Invalid amount")
 
     def paylov_check(self, id):

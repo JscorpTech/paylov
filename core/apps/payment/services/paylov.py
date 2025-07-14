@@ -47,5 +47,5 @@ def amount_to_tiny(amount):
     return int(amount * 100)
 
 
-def tiny_to_amount(tiny) -> float:
+def tiny_to_amount(tiny: int) -> float:
     return round(tiny / 100, 2)
