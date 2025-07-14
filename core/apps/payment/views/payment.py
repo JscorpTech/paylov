@@ -72,7 +72,7 @@ class PaymentViewset(GenericViewSet):
                     "id": request.data.get("id"),
                     "result": {"status": "3", "statusText": str(e)},
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_200_OK,
             )
 
     def paylov_perform(self, order, amount, id, currency):
