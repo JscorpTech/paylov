@@ -52,23 +52,16 @@ class PaymentViewset(GenericViewSet):
                 case "transaction.perform":
                     return self.paylov_perform(order, amount, request, currency)
                 case _:
-                    return Response(
-                        {
-                            "jsonrpc": "2.0",
-                            "id": request.data.get("id"),
-                            "error": {"code": -32601, "message": "Method not found"},
-                        },
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
+                    return self.response(request)
 
         except InvalidAmountException as e:
             logging.error(str(e))
-            return self.response(request, 5, "invalid_amount")
+            return self.response(request, "5", "invalid_amount")
         except OrderNotFoundException as e:
             logging.error(str(e))
-            return self.response(request, 303, "order_not_found")
+            return self.response(request, "303", "order_not_found")
 
-    def response(self, request, message="invalid_error", code=3):
+    def response(self, request, message="invalid_error", code="3"):
         return Response(
             {
                 "jsonrpc": "2.0",
@@ -88,7 +81,7 @@ class PaymentViewset(GenericViewSet):
             status=TransactionStatusEnum.SUCCESS.value,
             provider=PaymentProviderEnum.PAYLOV.value,
         )
-        return self.response(request, 0, "ok")
+        return self.response(request, "0", "ok")
 
     def paylov_validate(self, order, amount, currency):
         expected_amount = get_order_total_price(order)
@@ -102,4 +95,4 @@ class PaymentViewset(GenericViewSet):
             )
 
     def paylov_check(self, request):
-        return self.response(request, 0, "ok")
+        return self.response(request, '0', "ok")
