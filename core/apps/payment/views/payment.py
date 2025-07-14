@@ -12,7 +12,7 @@ from rest_framework import status
 from core.apps.payment.models import TransactionModel
 from core.apps.payment.enums import TransactionStatusEnum, PaymentProviderEnum
 from drf_spectacular.utils import extend_schema
-from core.apps.payment.services import uzs_to_usd
+from core.apps.payment.services import uzs_to_usd, tiny_to_amount
 
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.DEBUG)
@@ -88,10 +88,10 @@ class PaymentViewset(GenericViewSet):
         return Response({"jsonrpc": "2.0", "id": id, "result": {"status": "0", "statusText": "OK"}})
 
     def paylov_validate(self, order, amount, currency):
-        expected_amount = float(get_order_total_price(order))
+        expected_amount = get_order_total_price(order)
         if currency == 840:
             expected_amount = uzs_to_usd(expected_amount)
-        if float(expected_amount) != float(amount):
+        if float(expected_amount) != tiny_to_amount(amount):
             raise InvalidAmountException("Invalid amount")
 
     def paylov_check(self, id):

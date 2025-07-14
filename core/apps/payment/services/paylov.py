@@ -1,6 +1,7 @@
 import base64
 import urllib.parse
 from core.apps.shared.utils import get_exchange_rate
+from core.apps.payment.services import amount_to_tiny
 
 
 def generate_payment_link(amount, order_id, currency="uzs"):
@@ -14,8 +15,9 @@ def generate_payment_link(amount, order_id, currency="uzs"):
 
     query_params = {
         "merchant_id": merchant_id,
-        "amount": amount,
+        "amount": amount_to_tiny(amount),
         "return_url": return_url,
+        "amount_in_tiyin": True,
         "currency_id": get_currency_code(currency),
     }
     query_params[f"account.order_id"] = order_id
@@ -37,5 +39,14 @@ def get_currency_code(currency: str) -> int:
 def usd_to_uzs(amount):
     return amount * get_exchange_rate()
 
+
 def uzs_to_usd(amount):
     return round(amount / get_exchange_rate(), 2)
+
+
+def amount_to_tiny(amount):
+    return int(amount * 100)
+
+
+def tiny_to_amount(tiny) -> float:
+    return round(tiny / 100, 2)
