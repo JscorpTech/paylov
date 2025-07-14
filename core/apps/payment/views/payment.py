@@ -36,7 +36,7 @@ class PaymentViewset(GenericViewSet):
 
             params = ser.validated_data.get("params")
             order_id = params.get("account", {}).get("order_id")
-            amount = params.get("amount")
+            amount = params.get("amount_tiyin")
             currency = int(params.get("currency", 860))
             logging.info(params)
 
