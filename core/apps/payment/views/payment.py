@@ -81,7 +81,7 @@ class PaymentViewset(GenericViewSet):
             status=TransactionStatusEnum.SUCCESS.value,
             provider=PaymentProviderEnum.PAYLOV.value,
         )
-        return self.response(request, "0", "ok")
+        return self.response(request, "0", "OK")
 
     def paylov_validate(self, order, amount, currency):
         expected_amount = get_order_total_price(order)
@@ -95,4 +95,4 @@ class PaymentViewset(GenericViewSet):
             )
 
     def paylov_check(self, request):
-        return self.response(request, '0', "ok")
+        return self.response(request, '0', "OK")
