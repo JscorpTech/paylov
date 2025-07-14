@@ -1,7 +1,6 @@
 import base64
 import urllib.parse
 from core.apps.shared.utils import get_exchange_rate
-from core.apps.payment.services import amount_to_tiny
 
 
 def generate_payment_link(amount, order_id, currency="uzs"):
