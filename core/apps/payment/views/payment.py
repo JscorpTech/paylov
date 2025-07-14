@@ -14,9 +14,6 @@ from core.apps.payment.enums import TransactionStatusEnum, PaymentProviderEnum
 from drf_spectacular.utils import extend_schema
 from core.apps.payment.services import uzs_to_usd, tiny_to_amount
 
-logger = logging.getLogger("uvicorn")
-logger.setLevel(logging.DEBUG)
-
 
 @extend_schema(deprecated=True, tags=["payment"])
 class PaymentViewset(GenericViewSet):
@@ -38,7 +35,6 @@ class PaymentViewset(GenericViewSet):
             order_id = params.get("account", {}).get("order_id")
             amount = params.get("amount_tiyin")
             currency = int(params.get("currency", 860))
-            logging.info(params)
 
             order_qs = OrderModel.objects.filter(id=order_id)
             if not order_qs.exists():
@@ -48,13 +44,13 @@ class PaymentViewset(GenericViewSet):
             self.paylov_validate(order, amount, currency)
 
             method = ser.validated_data.get("method")
-            logger.info(f"Paylov method: {method}")
+            logging.info(f"Paylov method: {method}")
 
             match method:
                 case "transaction.check":
-                    return self.paylov_check(request.data.get("id"))
+                    return self.paylov_check(request)
                 case "transaction.perform":
-                    return self.paylov_perform(order, amount, request.data.get("id"), currency)
+                    return self.paylov_perform(order, amount, request, currency)
                 case _:
                     return Response(
                         {
@@ -65,18 +61,24 @@ class PaymentViewset(GenericViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-        except (InvalidAmountException, OrderNotFoundException) as e:
-            logger.error(str(e))
-            return Response(
-                {
-                    "jsonrpc": "2.0",
-                    "id": request.data.get("id"),
-                    "result": {"status": "3", "statusText": str(e)},
-                },
-                status=status.HTTP_200_OK,
-            )
+        except InvalidAmountException as e:
+            logging.error(str(e))
+            return self.response(request, 5, "invalid_amount")
+        except OrderNotFoundException as e:
+            logging.error(str(e))
+            return self.response(request, 303, "order_not_found")
 
-    def paylov_perform(self, order, amount, id, currency):
+    def response(request, message="invalid_error", code=3):
+        return Response(
+            {
+                "jsonrpc": "2.0",
+                "id": request.data.get("id"),
+                "result": {"status": code, "statusText": message},
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def paylov_perform(self, order, amount, request, currency):
         order.payment_status = PaymentStatusEnum.PAID.value
         order.save()
         TransactionModel.objects.create(
@@ -86,7 +88,7 @@ class PaymentViewset(GenericViewSet):
             status=TransactionStatusEnum.SUCCESS.value,
             provider=PaymentProviderEnum.PAYLOV.value,
         )
-        return Response({"jsonrpc": "2.0", "id": id, "result": {"status": "0", "statusText": "OK"}})
+        return self.response(request, 0, "ok")
 
     def paylov_validate(self, order, amount, currency):
         expected_amount = get_order_total_price(order)
@@ -94,14 +96,10 @@ class PaymentViewset(GenericViewSet):
             expected_amount = uzs_to_usd(expected_amount)
         if float(expected_amount) != tiny_to_amount(int(amount)):
             raise InvalidAmountException(
-                "Invalid amount {} {} {} {}".format(float(expected_amount), tiny_to_amount(int(amount)), currency, amount)
+                "Invalid amount {} {} {} {}".format(
+                    float(expected_amount), tiny_to_amount(int(amount)), currency, amount
+                )
             )
 
-    def paylov_check(self, id):
-        return Response(
-            {
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": {"status": "0", "statusText": "OK"},
-            }
-        )
+    def paylov_check(self, request):
+        return self.response(request, 0, "ok")
