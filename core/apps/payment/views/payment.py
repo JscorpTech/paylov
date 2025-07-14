@@ -92,7 +92,9 @@ class PaymentViewset(GenericViewSet):
         if currency == 840:
             expected_amount = uzs_to_usd(expected_amount)
         if float(expected_amount) != tiny_to_amount(int(amount)):
-            raise InvalidAmountException("Invalid amount")
+            raise InvalidAmountException(
+                "Invalid amount {} {} {}".format(float(expected_amount, tiny_to_amount(int(amount))), currency)
+            )
 
     def paylov_check(self, id):
         return Response(
