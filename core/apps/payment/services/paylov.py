@@ -48,4 +48,4 @@ def amount_to_tiny(amount):
 
 
 def tiny_to_amount(tiny: int) -> float:
-    return round(tiny / 100, 2)
+    return float(tiny / 100)
