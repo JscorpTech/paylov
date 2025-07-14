@@ -68,7 +68,7 @@ class PaymentViewset(GenericViewSet):
             logging.error(str(e))
             return self.response(request, 303, "order_not_found")
 
-    def response(request, message="invalid_error", code=3):
+    def response(self, request, message="invalid_error", code=3):
         return Response(
             {
                 "jsonrpc": "2.0",
