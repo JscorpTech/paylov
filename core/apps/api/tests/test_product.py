@@ -3,6 +3,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from core.apps.api.models import CartModel, OrderitemsModel, OrderModel, ProductModel
+from core.apps.shared.models import SettingsModel
+from core.apps.shared.models.settings import OptionsModel
 
 
 class ProductTest(TestCase):
@@ -12,6 +14,12 @@ class ProductTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.instance = self._create_data()
+        OptionsModel.objects.create(
+            settings=SettingsModel.objects.create(key="currency"),
+            key="exchange_rate",
+            value=[12],
+        )
+
         self.urls = {
             "list": reverse("product-list"),
             "retrieve": reverse("product-detail", kwargs={"pk": self.instance.pk}),
@@ -53,6 +61,7 @@ class OrderTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.instance = self._create_data()
+        self.client.force_authenticate(self.instance.user)
         self.urls = {
             "list": reverse("order-list"),
             "retrieve": reverse("order-detail", kwargs={"pk": self.instance.pk}),
@@ -95,6 +104,12 @@ class CartTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.instance = self._create_data()
+        OptionsModel.objects.create(
+            settings=SettingsModel.objects.create(key="currency"),
+            key="exchange_rate",
+            value=[12],
+        )
+        self.client.force_authenticate(self.instance.user)
         self.urls = {
             "list": reverse("basket-list"),
             "retrieve": reverse("basket-detail", kwargs={"pk": self.instance.pk}),
