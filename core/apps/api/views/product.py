@@ -24,7 +24,7 @@ from core.apps.api.serializers.product import (
     RetrieveOrderSerializer,
     RetrieveProductSerializer,
 )
-from core.apps.api.serializers.product.order import RetrieveOrderSerializer
+from core.apps.api.serializers.product.order import CreateOrderSerializerV2, RetrieveOrderSerializer
 from core.apps.api.services import get_order_total_price
 from core.apps.payment.services import generate_payment_link
 
@@ -51,12 +51,14 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     action_permission_classes = {
         "create": [AllowAny],
         "retrieve": [AllowAny],
+        "create_v2": [AllowAny],
         "checkout": [IsAuthenticated],
     }
     action_serializer_class = {
         "list": ListOrderSerializer,
         "retrieve": RetrieveOrderSerializer,
         "create": CreateOrderSerializer,
+        "create_v2": CreateOrderSerializerV2,
     }
 
     def get_queryset(self):
@@ -68,6 +70,13 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
         return queryset
 
     def create(self, request):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        return Response(data=ser.data)
+
+    @action(methods=["post"], detail=False, url_name="create", url_path="create")
+    def create_v2(self, request):
         ser = self.get_serializer(data=request.data)
         ser.is_valid(raise_exception=True)
         ser.save()
