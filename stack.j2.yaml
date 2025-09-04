@@ -109,7 +109,7 @@ services:
     ports:
       - mode: ingress 
         target: 80
-        published: 8002
+        published: 8003
         protocol: tcp
     volumes:
       - type: bind
