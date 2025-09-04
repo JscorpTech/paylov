@@ -1,16 +1,13 @@
-from django_core.mixins import BaseViewSetMixin
-from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
-from django.db.transaction import atomic
-from core.apps.api.serializers.product.order import RetrieveOrderSerializer
-from core.apps.payment.services import generate_payment_link
-from core.apps.api.services import get_order_total_price
 from django.db.models import F
+from django.db.transaction import atomic
+from django.utils.translation import gettext_lazy as _
+from django_core.mixins import BaseViewSetMixin
+from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from core.apps.api.models import CartModel, OrderitemsModel, OrderModel, ProductModel
 from core.apps.api.serializers.product import (
@@ -27,6 +24,9 @@ from core.apps.api.serializers.product import (
     RetrieveOrderSerializer,
     RetrieveProductSerializer,
 )
+from core.apps.api.serializers.product.order import RetrieveOrderSerializer
+from core.apps.api.services import get_order_total_price
+from core.apps.payment.services import generate_payment_link
 
 
 @extend_schema(tags=["product"])
@@ -51,6 +51,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     action_permission_classes = {
         "create": [AllowAny],
         "retrieve": [AllowAny],
+        "checkout": [IsAuthenticated],
     }
     action_serializer_class = {
         "list": ListOrderSerializer,
