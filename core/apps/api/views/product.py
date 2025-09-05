@@ -145,7 +145,10 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     )
     def create_transaction(self, request, pk, currency):
         order = self.get_object()
-        link = generate_payment_link(int(get_order_total_price(order)), order.id, currency, False)
+        currency_convery = True
+        if order.amount is None:
+            currency_convery = False
+        link = generate_payment_link(int(get_order_total_price(order)), order.id, currency, currency_convery)
         return Response(data={"payment_link": link})
 
 
