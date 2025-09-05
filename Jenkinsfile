@@ -24,7 +24,7 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh """
+                sh '''
                     if [ -e ${PROD_ENV} ]; then
                        echo env exists
                     else
@@ -32,6 +32,8 @@ pipeline {
                         cp ./.env.example ${PROD_ENV}
                     fi
                     cp ${PROD_ENV} ./.env
+                '''
+                sh """
                     docker build -t ${IMAGE_NAME}:${PROD_TAG} --build-arg SCRIPT=entrypoint-server.sh -f ./docker/Dockerfile.web .
                 """
             }
