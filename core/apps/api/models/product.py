@@ -2,7 +2,8 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_core.models import AbstractBaseModel
-from core.apps.api.enums import PaymentStatusEnum, OrderStatusEnum
+
+from core.apps.api.enums import OrderStatusEnum, PaymentStatusEnum
 
 
 class ProductModel(AbstractBaseModel):
@@ -51,6 +52,7 @@ class OrderModel(AbstractBaseModel):
     region = models.CharField(_("Region"), null=True, blank=True)
     district = models.CharField(_("District"), null=True, blank=True)
     comment = models.CharField(_("Comment"), null=True, blank=True)
+    amount = models.BigIntegerField(_("amount"), null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -107,7 +109,9 @@ class CartModel(AbstractBaseModel):
     @classmethod
     def _create_fake(self):
         return self.objects.create(
-            name="mock",
+            product=ProductModel._create_fake(),
+            user=get_user_model()._create_fake(),
+            count=1,
         )
 
     class Meta:
