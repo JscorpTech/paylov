@@ -16,11 +16,15 @@ def home(request):
     return HttpResponse("OK")
 
 
+def home(request):
+    return HttpResponse("OK")
+
+
 ################
 # My apps url
 ################
 urlpatterns = [
-    path("", home),
+    path("health/", home),
     path("", include("core.apps.accounts.urls")),
     path("", include("core.apps.api.urls")),
     path("", include("core.apps.shared.urls")),
