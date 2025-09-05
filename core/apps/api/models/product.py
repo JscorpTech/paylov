@@ -10,12 +10,8 @@ class ProductModel(AbstractBaseModel):
     name = models.CharField(verbose_name=_("name"), max_length=255)
     price = models.FloatField(verbose_name=_("price"))
     quantity = models.IntegerField(verbose_name=_("quantity"))
-    image = models.ImageField(verbose_name=_("image"),
-                              upload_to="product",
-                              default="product/default.png")
-    description = models.TextField(verbose_name=_("description"),
-                                   null=True,
-                                   blank=True)
+    image = models.ImageField(verbose_name=_("image"), upload_to="product", default="product/default.png")
+    description = models.TextField(verbose_name=_("description"), null=True, blank=True)
 
     def __str__(self):
         return str(self.pk)
@@ -36,20 +32,16 @@ class ProductModel(AbstractBaseModel):
 
 
 class OrderModel(AbstractBaseModel):
-    user = models.ForeignKey(get_user_model(),
-                             verbose_name="user",
-                             related_name="orders",
-                             on_delete=models.CASCADE,
-                             null=True,
-                             blank=True)
+    user = models.ForeignKey(
+        get_user_model(), verbose_name="user", related_name="orders", on_delete=models.CASCADE, null=True, blank=True
+    )
     is_notify = models.BooleanField(_("Is Notify"), default=False)
-    payment_status = models.CharField(_("payment status"),
-                                      choices=PaymentStatusEnum.choices,
-                                      default=PaymentStatusEnum.PENDING)
-    status = models.CharField(_("status"),
-                              choices=OrderStatusEnum.choices,
-                              default=OrderStatusEnum.CREATED,
-                              max_length=20)
+    payment_status = models.CharField(
+        _("payment status"), choices=PaymentStatusEnum.choices, default=PaymentStatusEnum.PENDING
+    )
+    status = models.CharField(
+        _("status"), choices=OrderStatusEnum.choices, default=OrderStatusEnum.CREATED, max_length=20
+    )
 
     # Order reciver info
     first_name = models.CharField(_("First Name"), null=True, blank=True)
@@ -71,7 +63,9 @@ class OrderModel(AbstractBaseModel):
 
     @classmethod
     def _create_fake(self):
-        return self.objects.create(user=get_user_model()._create_fake(), )
+        return self.objects.create(
+            user=get_user_model()._create_fake(),
+        )
 
     class Meta:
         db_table = "order"
@@ -80,14 +74,8 @@ class OrderModel(AbstractBaseModel):
 
 
 class OrderitemsModel(AbstractBaseModel):
-    order = models.ForeignKey(OrderModel,
-                              verbose_name="order",
-                              related_name="items",
-                              on_delete=models.CASCADE)
-    product = models.ForeignKey(ProductModel,
-                                verbose_name="product",
-                                related_name="items",
-                                on_delete=models.CASCADE)
+    order = models.ForeignKey(OrderModel, verbose_name="order", related_name="items", on_delete=models.CASCADE)
+    product = models.ForeignKey(ProductModel, verbose_name="product", related_name="items", on_delete=models.CASCADE)
     count = models.IntegerField(verbose_name=_("count"), default=1)
     price = models.FloatField(verbose_name=_("price"))
     discount = models.FloatField(_("discount"), null=True, blank=True)
@@ -111,13 +99,8 @@ class OrderitemsModel(AbstractBaseModel):
 
 
 class CartModel(AbstractBaseModel):
-    product = models.ForeignKey("ProductModel",
-                                verbose_name=_("product"),
-                                on_delete=models.CASCADE)
-    user = models.ForeignKey(get_user_model(),
-                             verbose_name=_("user"),
-                             on_delete=models.CASCADE,
-                             related_name="carts")
+    product = models.ForeignKey("ProductModel", verbose_name=_("product"), on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), verbose_name=_("user"), on_delete=models.CASCADE, related_name="carts")
     count = models.PositiveIntegerField(_("count"), default=1)
 
     def __str__(self):
@@ -125,7 +108,11 @@ class CartModel(AbstractBaseModel):
 
     @classmethod
     def _create_fake(self):
-        return self.objects.create(name="mock", )
+        return self.objects.create(
+            product=ProductModel._create_fake(),
+            user=get_user_model()._create_fake(),
+            count=1,
+        )
 
     class Meta:
         db_table = "cart"

@@ -10,7 +10,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     networks:
-      - vesbini
+      - paylov
     deploy:
       replicas: 1
       placement:
@@ -41,7 +41,7 @@ services:
     image: redis:7-alpine
     command: ["redis-server", "--appendonly", "yes"]
     networks:
-      - vesbini
+      - paylov
     deploy:
       replicas: 1
       placement:
@@ -68,12 +68,12 @@ services:
         max-file: "3"
 
   web:
-    image: "{{ username }}/{{ name }}:{{ tag }}" 
+    image: "{{ username }}/{{ name }}:{{ tag }}"
     environment:
       - SCRIPT=entrypoint.sh
       - PYTHONPYCACHEPREFIX=/var/cache/pycache
     networks:
-      - vesbini
+      - paylov
     volumes:
       - logs:/code/resources/logs/
       - media:/code/resources/media/
@@ -97,7 +97,7 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
       interval: 15s
       timeout: 15s
-      retries: 20
+      retries: 5
     logging:
       driver: json-file
       options:
@@ -109,7 +109,7 @@ services:
     ports:
       - mode: ingress 
         target: 80
-        published: 8002
+        published: 8003
         protocol: tcp
     volumes:
       - type: bind
@@ -119,7 +119,7 @@ services:
       - media:/usr/share/nginx/html/resources/media/:ro
       - static:/usr/share/nginx/html/resources/staticfiles/:ro
     networks:
-      - vesbini
+      - paylov
     deploy:
       replicas: 1
       restart_policy:
@@ -150,7 +150,7 @@ services:
         max-file: "3"
 
 networks:
-  vesbini:
+  paylov:
     driver: overlay 
 
 volumes:
@@ -159,4 +159,3 @@ volumes:
   pycache:
   static:
   logs:
-
