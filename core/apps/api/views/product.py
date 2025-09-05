@@ -27,6 +27,7 @@ from core.apps.api.serializers.product import (
 from core.apps.api.serializers.product.order import CreateOrderSerializerV2, RetrieveOrderSerializer
 from core.apps.api.services import get_order_total_price
 from core.apps.payment.services import generate_payment_link
+from core.apps.payment.services.paylov import usd_to_uzs
 
 
 @extend_schema(tags=["product"])
@@ -144,7 +145,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     )
     def create_transaction(self, request, pk, currency):
         order = self.get_object()
-        link = generate_payment_link(int(get_order_total_price(order)), order.id, currency)
+        link = generate_payment_link(int(get_order_total_price(order)), order.id, currency, False)
         return Response(data={"payment_link": link})
 
 
