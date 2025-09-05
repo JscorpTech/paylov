@@ -1,12 +1,13 @@
 import base64
 import urllib.parse
 from core.apps.shared.utils import get_exchange_rate
+from config.env import env
 
 
 def generate_payment_link(amount, order_id, currency="uzs"):
     # Create query string
     base_url = "https://my.paylov.uz/checkout/create/"
-    merchant_id = "ed364cd2-313c-4842-81e4-c9d74ccfb7b8"
+    merchant_id = env.str("PAYLOV_ID")
     return_url = "https://atomcom.framer.website/cart"
 
     if currency == "usd":
