@@ -8,7 +8,6 @@ pipeline {
     environment {
         PROD_ENV     = "/opt/env/.env.paylov"
         IMAGE_NAME   = "paylov"
-        TEST_TAG     = "test"
         PROD_TAG     = "latest"
         CONTAINER_DB = "paylov_db_test"
         CONTAINER_WEB = "paylov_web_test"
@@ -23,14 +22,21 @@ pipeline {
                 stash includes: 'stack.j2.yaml', name: "stack.j2.yaml"
             }
         }
-        stage('Build Test Image') {
+        stage('Build Image') {
             steps {
                 sh """
+                    if [ -e ${PROD_ENV} ]; then
+                       echo env exists
+                    else
+                        mkdir -p $(dirname ${PROD_ENV})
+                        cp ./.env.example ${PROD_ENV}
+                    fi
                     cp ${PROD_ENV} ./.env
-                    docker build -t ${IMAGE_NAME}:${TEST_TAG} -f ./docker/Dockerfile.web .
+                    docker build -t ${IMAGE_NAME}:${PROD_TAG} --build-arg SCRIPT=entrypoint-server.sh -f ./docker/Dockerfile.web .
                 """
             }
         }
+
 
         stage('Start Test DB') {
             steps {
@@ -60,20 +66,8 @@ pipeline {
                         -e DB_USER=postgres \
                         -e DB_PASSWORD=postgres \
                         -e DJANGO_SETTINGS_MODULE=config.settings.test \
-                        ${IMAGE_NAME}:${TEST_TAG} \
+                        ${IMAGE_NAME}:${PROD_TAG} \
                         sh -c "python manage.py migrate && pytest -v"
-                """
-            }
-        }
-
-        stage('Build Production Image') {
-            when {
-                expression { currentBuild.currentResult == "SUCCESS" }
-            }
-            steps {
-                sh """
-                    cp ${PROD_ENV} ./.env
-                    docker build -t ${IMAGE_NAME}:${PROD_TAG} --build-arg SCRIPT=entrypoint-server.sh -f ./docker/Dockerfile.web .
                 """
             }
         }
