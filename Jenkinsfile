@@ -13,7 +13,7 @@ pipeline {
         CONTAINER_DB = "paylov_db_test"
         CONTAINER_WEB = "paylov_web_test"
         CONTAINER_REDIS = "paylov_redis_test"
-        STACK_NAME = "store2"
+        STACK_NAME = "paylov2"
     }
 
     stages {
