@@ -141,8 +141,8 @@ services:
       - /var/tmp
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost/health/ || exit 1"]
-      interval: 10s
-      timeout: 5s
+      interval: 15s
+      timeout: 10s
       retries: 5
     logging:
       driver: json-file
