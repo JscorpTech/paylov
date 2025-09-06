@@ -106,7 +106,7 @@ services:
         max-file: "3"
 
   nginx:
-    image: nginx:1.27-alpine
+    image: jscorptech/nginx:v1
     ports:
       - mode: ingress 
         target: 80
