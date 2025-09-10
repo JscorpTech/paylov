@@ -9,7 +9,7 @@ def generate_payment_link(amount, order_id, currency="uzs", currncy_convert=True
     # Create query string
     base_url = "https://my.paylov.uz/checkout/create/"
     merchant_id = env.str("PAYLOV_ID")
-    return_url = "https://atomcom.framer.website/cart"
+    return_url = "https://ulitka.uz/cart"
 
     if currency == "usd" and currncy_convert:
         amount = uzs_to_usd(amount)
