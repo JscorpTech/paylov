@@ -24,13 +24,9 @@ class PaymentViewset(GenericViewSet):
     def get_serializer_class(self, *args, **kwargs):
         if self.action == "paylov":
             return PaylovCallbackSerializers
-        raise NotImplementedError(
-            f"No serializer class defined for action: {self.action}")
+        raise NotImplementedError(f"No serializer class defined for action: {self.action}")
 
-    @action(methods=["POST"],
-            detail=False,
-            url_name="paylov",
-            url_path="paylov")
+    @action(methods=["POST"], detail=False, url_name="paylov", url_path="paylov")
     def paylov(self, request):
         try:
             serializer_class = self.get_serializer_class()
@@ -56,8 +52,7 @@ class PaymentViewset(GenericViewSet):
                 case "transaction.check":
                     return self.paylov_check(request)
                 case "transaction.perform":
-                    return self.paylov_perform(order, amount, request,
-                                               currency)
+                    return self.paylov_perform(order, amount, request, currency)
                 case _:
                     return self.response(request)
 
@@ -73,10 +68,7 @@ class PaymentViewset(GenericViewSet):
             {
                 "jsonrpc": "2.0",
                 "id": request.data.get("id"),
-                "result": {
-                    "status": code,
-                    "statusText": message
-                },
+                "result": {"status": code, "statusText": message},
             },
             status=status.HTTP_200_OK,
         )
@@ -95,12 +87,14 @@ class PaymentViewset(GenericViewSet):
 
     def paylov_validate(self, order, amount, currency):
         expected_amount = get_order_total_price(order)
-        if currency == 840:
+        if currency == 840 and order.amount is None:
             expected_amount = uzs_to_usd(expected_amount)
         if float(expected_amount) != tiny_to_amount(int(amount)):
-            raise InvalidAmountException("Invalid amount {} {} {} {}".format(
-                float(expected_amount), tiny_to_amount(int(amount)), currency,
-                amount))
+            raise InvalidAmountException(
+                "Invalid amount {} {} {} {}".format(
+                    float(expected_amount), tiny_to_amount(int(amount)), currency, amount
+                )
+            )
 
     def paylov_check(self, request):
         return self.response(request, "0", "OK")
