@@ -38,7 +38,7 @@ services:
         max-file: "3"
 
   redis:
-    image: redis:7-alpine
+    image: redis:alpine 
     command: ["redis-server", "--appendonly", "yes"]
     networks:
       - paylov
@@ -58,8 +58,8 @@ services:
         order: start-first
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
+      interval: 15s
+      timeout: 10s
       retries: 5
     logging:
       driver: json-file
@@ -68,7 +68,7 @@ services:
         max-file: "3"
 
   web:
-    image: "{{ username }}/{{ name }}:{{ tag }}"
+    image: jscorptech/paylov:latest 
     env_file:
       - .env
     environment:
@@ -141,8 +141,8 @@ services:
       - /var/tmp
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost/health/ || exit 1"]
-      interval: 15s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 5
     logging:
       driver: json-file
