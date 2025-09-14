@@ -146,9 +146,9 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     @action(
         methods=["GET"], detail=True, url_name="create-transaction", url_path="create-transaction/(?P<currency>uzs|usd)"
     )
-    def create_transaction(self, request, pk, currency_code):
+    def create_transaction(self, request, pk, currency):
         order = self.get_object()
-        currency_code = get_currency_code(currency_code)
+        currency_code = get_currency_code(currency)
         amount = int(get_order_total_price(order))
         if order.amount is None and currency == "usd":
             amount = uzs_to_usd(amount)
