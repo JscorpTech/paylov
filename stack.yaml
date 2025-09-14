@@ -68,7 +68,7 @@ services:
         max-file: "3"
 
   web:
-    image: jscorptech/paylov:latest 
+    image: jscorptech/paylov:v1.0.0
     env_file:
       - .env
     environment:
