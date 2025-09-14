@@ -1,12 +1,13 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_core.models import AbstractBaseModel
-from core.apps.payment.enums import TransactionStatusEnum, PaymentProviderEnum
+
 from core.apps.api.models import OrderModel
+from core.apps.payment.enums import PaymentProviderEnum, TransactionStatusEnum
 
 
 class TransactionModel(AbstractBaseModel):
-    amount = models.BigIntegerField(verbose_name=_("amount"))
+    amount = models.FloatField(verbose_name=_("amount"))
     currency = models.PositiveIntegerField(_("currency"), default=860)
     order = models.ForeignKey("api.OrderModel", verbose_name=_("order"), on_delete=models.CASCADE)
     status = models.CharField(
