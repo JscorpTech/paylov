@@ -5,7 +5,7 @@ from config.env import env
 from core.apps.shared.utils import get_exchange_rate
 
 
-def generate_payment_link(amount, order_id, currency="uzs"):
+def generate_payment_link(amount, order_id, currency=860):
     # Create query string
     base_url = "https://my.paylov.uz/checkout/create/"
     merchant_id = env.str("PAYLOV_ID")
@@ -16,7 +16,7 @@ def generate_payment_link(amount, order_id, currency="uzs"):
         "amount": amount_to_tiny(amount),
         "return_url": return_url,
         "amount_in_tiyin": True,
-        "currency_id": get_currency_code(currency),
+        "currency_id": currency,
     }
     query_params[f"account.order_id"] = order_id
     query_string = urllib.parse.urlencode(query_params)

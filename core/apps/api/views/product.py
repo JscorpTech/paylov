@@ -30,7 +30,7 @@ from core.apps.api.services import get_order_total_price
 from core.apps.payment.enums.payment import PaymentProviderEnum, TransactionStatusEnum
 from core.apps.payment.models.payment import TransactionModel
 from core.apps.payment.services import generate_payment_link
-from core.apps.payment.services.paylov import usd_to_uzs, uzs_to_usd
+from core.apps.payment.services.paylov import get_currency_code, usd_to_uzs, uzs_to_usd
 
 
 @extend_schema(tags=["product"])
@@ -148,6 +148,7 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     )
     def create_transaction(self, request, pk, currency):
         order = self.get_object()
+        currency = get_currency_code(currency)
         amount = int(get_order_total_price(order))
         if order.amount is None and currency == "usd":
             amount = uzs_to_usd(amount)
