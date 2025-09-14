@@ -146,20 +146,20 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     @action(
         methods=["GET"], detail=True, url_name="create-transaction", url_path="create-transaction/(?P<currency>uzs|usd)"
     )
-    def create_transaction(self, request, pk, currency):
+    def create_transaction(self, request, pk, currency_code):
         order = self.get_object()
-        currency = get_currency_code(currency)
+        currency_code = get_currency_code(currency_code)
         amount = int(get_order_total_price(order))
         if order.amount is None and currency == "usd":
             amount = uzs_to_usd(amount)
         transaction = TransactionModel.objects.create(
             amount=amount,
-            currency=currency,
+            currency=currency_code,
             order=order,
             status=TransactionStatusEnum.PENDING.value,
             provider=PaymentProviderEnum.PAYLOV.value,
         )
-        link = generate_payment_link(amount, transaction.id, currency)
+        link = generate_payment_link(amount, transaction.id, currency_code)
         return Response(data={"payment_link": link})
 
 

@@ -41,11 +41,10 @@ class PaymentViewset(GenericViewSet):
 
             try:
                 transaction = TransactionModel.objects.get(pk=trans_id)
-                order = transaction.order
             except TransactionModel.DoesNotExist:
                 raise OrderNotFoundException("Order not found")
 
-            self.paylov_validate(order, amount, currency)
+            self.paylov_validate(transaction, amount, currency)
 
             method = ser.validated_data.get("method")
             logging.info(f"Paylov method: {method}")
@@ -83,14 +82,13 @@ class PaymentViewset(GenericViewSet):
         transaction.save()
         return self.response(request, "0", "OK")
 
-    def paylov_validate(self, order, amount, currency):
-        expected_amount = get_order_total_price(order)
-        if currency == 840 and order.amount is None:
-            expected_amount = uzs_to_usd(expected_amount)
-        if float(expected_amount) != tiny_to_amount(int(amount)):
+    def paylov_validate(self, transaction, amount, currency):
+        if currency != transaction.currency:
+            raise InvalidAmountException("Invalid currency")
+        if float(transaction.amount) != tiny_to_amount(int(amount)):
             raise InvalidAmountException(
                 "Invalid amount {} {} {} {}".format(
-                    float(expected_amount), tiny_to_amount(int(amount)), currency, amount
+                    float(transaction.amoun), tiny_to_amount(int(amount)), currency, amount
                 )
             )
 
