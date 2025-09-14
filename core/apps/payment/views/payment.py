@@ -88,7 +88,7 @@ class PaymentViewset(GenericViewSet):
         if float(transaction.amount) != tiny_to_amount(int(amount)):
             raise InvalidAmountException(
                 "Invalid amount {} {} {} {}".format(
-                    float(transaction.amoun), tiny_to_amount(int(amount)), currency, amount
+                    float(transaction.amount), tiny_to_amount(int(amount)), currency, amount
                 )
             )
 
