@@ -1,5 +1,6 @@
 import logging
 
+from django.utils import translation
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -34,15 +35,16 @@ class PaymentViewset(GenericViewSet):
             ser.is_valid(raise_exception=True)
 
             params = ser.validated_data.get("params")
-            order_id = params.get("account", {}).get("order_id")
+            trans_id = params.get("account", {}).get("order_id")
             amount = params.get("amount_tiyin")
             currency = int(params.get("currency", 860))
 
-            order_qs = OrderModel.objects.filter(id=order_id)
-            if not order_qs.exists():
+            try:
+                transaction = TransactionModel.objects.get(pk=trans_id)
+                order = transaction.order
+            except TransactionModel.DoesNotExist:
                 raise OrderNotFoundException("Order not found")
 
-            order = order_qs.first()
             self.paylov_validate(order, amount, currency)
 
             method = ser.validated_data.get("method")
@@ -52,7 +54,7 @@ class PaymentViewset(GenericViewSet):
                 case "transaction.check":
                     return self.paylov_check(request)
                 case "transaction.perform":
-                    return self.paylov_perform(order, amount, request, currency)
+                    return self.paylov_perform(transaction, request)
                 case _:
                     return self.response(request)
 
@@ -73,16 +75,12 @@ class PaymentViewset(GenericViewSet):
             status=status.HTTP_200_OK,
         )
 
-    def paylov_perform(self, order, amount, request, currency):
+    def paylov_perform(self, transaction, request):
+        order = transaction.order
         order.payment_status = PaymentStatusEnum.PAID.value
         order.save()
-        TransactionModel.objects.create(
-            amount=amount,
-            currency=currency,
-            order=order,
-            status=TransactionStatusEnum.SUCCESS.value,
-            provider=PaymentProviderEnum.PAYLOV.value,
-        )
+        transaction.status = TransactionStatusEnum.SUCCESS.value
+        transaction.save()
         return self.response(request, "0", "OK")
 
     def paylov_validate(self, order, amount, currency):

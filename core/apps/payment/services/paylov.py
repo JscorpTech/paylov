@@ -5,14 +5,11 @@ from config.env import env
 from core.apps.shared.utils import get_exchange_rate
 
 
-def generate_payment_link(amount, order_id, currency="uzs", currncy_convert=True):
+def generate_payment_link(amount, order_id, currency="uzs"):
     # Create query string
     base_url = "https://my.paylov.uz/checkout/create/"
     merchant_id = env.str("PAYLOV_ID")
     return_url = "https://ulitka.uz/cart"
-
-    if currency == "usd" and currncy_convert:
-        amount = uzs_to_usd(amount)
 
     query_params = {
         "merchant_id": merchant_id,

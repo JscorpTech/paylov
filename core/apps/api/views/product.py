@@ -1,5 +1,6 @@
 from django.db.models import F
 from django.db.transaction import atomic
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from django_core.mixins import BaseViewSetMixin
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
@@ -26,8 +27,10 @@ from core.apps.api.serializers.product import (
 )
 from core.apps.api.serializers.product.order import CreateOrderSerializerV2, RetrieveOrderSerializer
 from core.apps.api.services import get_order_total_price
+from core.apps.payment.enums.payment import PaymentProviderEnum, TransactionStatusEnum
+from core.apps.payment.models.payment import TransactionModel
 from core.apps.payment.services import generate_payment_link
-from core.apps.payment.services.paylov import usd_to_uzs
+from core.apps.payment.services.paylov import usd_to_uzs, uzs_to_usd
 
 
 @extend_schema(tags=["product"])
@@ -145,10 +148,17 @@ class OrderView(BaseViewSetMixin, ReadOnlyModelViewSet):
     )
     def create_transaction(self, request, pk, currency):
         order = self.get_object()
-        currency_convery = False
-        if order.amount is None:
-            currency_convery = True
-        link = generate_payment_link(int(get_order_total_price(order)), order.id, currency, currency_convery)
+        amount = int(get_order_total_price(order))
+        if order.amount is None and currency == "usd":
+            amount = uzs_to_usd(amount)
+        transaction = TransactionModel.objects.create(
+            amount=amount,
+            currency=currency,
+            order=order,
+            status=TransactionStatusEnum.PENDING.value,
+            provider=PaymentProviderEnum.PAYLOV.value,
+        )
+        link = generate_payment_link(amount, transaction.id, currency)
         return Response(data={"payment_link": link})
 
 
